@@ -199,6 +199,15 @@
                 player.rotation.y -= rotateSpeed;
             }
 
+                  // Agregar un event listener para el clic del ratón
+        document.addEventListener('mousedown', (event) => {
+            if (event.button === 0) { // 0 es el botón izquierdo del ratón
+                shoot();
+            }
+        });
+          
+          
+          
             // Comprobar límites
             if (Math.abs(player.position.x) > 19 || Math.abs(player.position.z) > 19) {
                 player.position.copy(oldPosition);
@@ -278,7 +287,7 @@
 
         // Función para actualizar el mini-mapa
         function updateMinimap() {
-            minimapCtx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            minimapCtx.fillStyle = 'rgba(34, 139, 34, 0.75)';
             minimapCtx.fillRect(0, 0, minimapCanvas.width, minimapCanvas.height);
 
             // Dibujar el jugador
@@ -290,8 +299,8 @@
             minimapCtx.fill();
 
             // Dibujar la dirección del jugador
-            const directionX = Math.sin(player.rotation.y) * 10;
-            const directionZ = Math.cos(player.rotation.y) * 10;
+const directionX = -Math.sin(player.rotation.y) * 10;
+const directionZ = -Math.cos(player.rotation.y) * 10;
             minimapCtx.strokeStyle = '#ffff00';
             minimapCtx.beginPath();
             minimapCtx.moveTo(playerX, playerZ);
