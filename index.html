@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -77,8 +77,8 @@
         const ambientLight = new THREE.AmbientLight(0x404040);
         scene.add(ambientLight);
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-        directionalLight.position.set(5, 10, 7.5);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.55);
+        directionalLight.position.set(55, 10, 7.5);
         directionalLight.castShadow = true;
         scene.add(directionalLight);
 
@@ -430,7 +430,7 @@
             const grassMaterial = new THREE.MeshPhongMaterial({
                 color: 0x33FF33,
                 side: THREE.DoubleSide,
-                transparent: true,
+                transparent: false,
                 alphaTest: 0.5
             });
 
@@ -503,6 +503,9 @@
 
     // Crear el mesh del agua
     const water = new THREE.Mesh(geometry, waterMaterial);
+    
+    //sobra agua
+    water.castShadow = true;
 
     // Rotar y posicionar el agua
     water.rotation.x = -Math.PI / 2;
@@ -510,7 +513,7 @@
 
     // Centrar el agua en el mapa
     water.position.x = -20;
-    water.position.z = 0;
+    water.position.z = 10;
 
     // Función de animación
     function animate() {
