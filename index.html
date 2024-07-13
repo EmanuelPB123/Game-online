@@ -1,20 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FPS Captura la Bandera</title>
     <style>
-        body { 
-            margin: 0; 
-            overflow: hidden; 
+        body {
+            margin: 0;
+            overflow: hidden;
             font-family: Arial, sans-serif;
             background-color: #000;
         }
-        #gameCanvas { 
-            width: 100%; 
-            height: 100%; 
+
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
         }
+
         #minimap {
             position: absolute;
             top: 40px;
@@ -25,6 +28,7 @@
             border: 2px solid #fff;
             border-radius: 10px;
         }
+
         #score {
             position: absolute;
             top: 20px;
@@ -36,6 +40,7 @@
             padding: 10px 20px;
             border-radius: 20px;
         }
+
         #controls {
             position: absolute;
             bottom: 20px;
@@ -47,6 +52,7 @@
         }
     </style>
 </head>
+
 <body>
     <canvas id="gameCanvas"></canvas>
     <canvas id="minimap"></canvas>
@@ -95,7 +101,7 @@
         // Generar elevaciones aleatorias para el terreno
         const vertices = terrain.geometry.attributes.position.array;
         for (let i = 0; i <= vertices.length; i += 3) {
-            vertices[i+2] = Math.random() * 0.5;
+            vertices[i + 2] = Math.random() * 0.5;
         }
         terrain.geometry.attributes.position.needsUpdate = false;
         terrain.geometry.computeVertexNormals();
@@ -103,7 +109,7 @@
         // Crear paredes para los límites del mapa
         const wallGeometry = new THREE.BoxGeometry(40, 4, 1);
         const wallMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
-        
+
         const wallNorth = new THREE.Mesh(wallGeometry, wallMaterial);
         wallNorth.position.set(0, 2, -20);
         wallNorth.castShadow = true;
@@ -140,11 +146,11 @@
         minimapCanvas.height = 200;
 
         // Variables para el movimiento y disparo
-        const moveSpeed = 0.15;
-        const rotateSpeed = 0.05;
+        const moveSpeed = 0.10;
+        const rotateSpeed = 0.10;
         const keysPressed = {};
         const bullets = [];
-        const bulletSpeed = 0.7;
+        const bulletSpeed = 1;
         const bulletLifetime = 100;
 
         // Variables para el sistema de captura la bandera
@@ -192,22 +198,14 @@
             if (keysPressed['s']) {
                 player.translateZ(moveSpeed);
             }
-            if (keysPressed['a']) {
-                player.rotation.y += rotateSpeed;
-            }
             if (keysPressed['d']) {
-                player.rotation.y -= rotateSpeed;
+                player.translateX(moveSpeed);
+            }
+            if (keysPressed['a']) {
+                player.translateX(-moveSpeed);
             }
 
-                  // Agregar un event listener para el clic del ratón
-        document.addEventListener('mousedown', (event) => {
-            if (event.button === 0) { // 0 es el botón izquierdo del ratón
-                shoot();
-            }
-        });
-          
-          
-          
+
             // Comprobar límites
             if (Math.abs(player.position.x) > 19 || Math.abs(player.position.z) > 19) {
                 player.position.copy(oldPosition);
@@ -276,8 +274,8 @@
                 bullet.mesh.position.add(bullet.mesh.velocity);
                 bullet.lifetime--;
 
-                if (bullet.lifetime <= 0 || 
-                    Math.abs(bullet.mesh.position.x) > 20 || 
+                if (bullet.lifetime <= 0 ||
+                    Math.abs(bullet.mesh.position.x) > 20 ||
                     Math.abs(bullet.mesh.position.z) > 20) {
                     scene.remove(bullet.mesh);
                     bullets.splice(i, 1);
@@ -299,8 +297,8 @@
             minimapCtx.fill();
 
             // Dibujar la dirección del jugador
-const directionX = -Math.sin(player.rotation.y) * 10;
-const directionZ = -Math.cos(player.rotation.y) * 10;
+            const directionX = -Math.sin(player.rotation.y) * 10;
+            const directionZ = -Math.cos(player.rotation.y) * 10;
             minimapCtx.strokeStyle = '#ffff00';
             minimapCtx.beginPath();
             minimapCtx.moveTo(playerX, playerZ);
@@ -317,10 +315,10 @@ const directionZ = -Math.cos(player.rotation.y) * 10;
                 const bulletX = (bullet.mesh.position.x + 20) * (minimapCanvas.width / 40);
                 const bulletZ = (bullet.mesh.position.z + 20) * (minimapCanvas.height / 40);
                 minimapCtx.beginPath();
-                minimapCtx.arc(bulletX, bulletZ, 2, 0, 2 * Math.PI);
+                minimapCtx.arc(bulletX, bulletZ, 1, 0, 1 * Math.PI);
                 minimapCtx.fill();
             });
-// Dibujar las banderas
+            // Dibujar las banderas
             function drawFlag(flag, color) {
                 if (flag.parent) {
                     const flagX = (flag.position.x + 20) * (minimapCanvas.width / 40);
@@ -328,8 +326,8 @@ const directionZ = -Math.cos(player.rotation.y) * 10;
                     minimapCtx.fillStyle = color;
                     minimapCtx.beginPath();
                     minimapCtx.moveTo(flagX, flagZ);
-                    minimapCtx.lineTo(flagX, flagZ - 10);
-                    minimapCtx.lineTo(flagX + 5, flagZ - 5);
+                    minimapCtx.lineTo(flagX, flagZ - 1);
+                    minimapCtx.lineTo(flagX + 1, flagZ - 1);
                     minimapCtx.lineTo(flagX, flagZ);
                     minimapCtx.fill();
                 }
@@ -377,86 +375,156 @@ const directionZ = -Math.cos(player.rotation.y) * 10;
             }
         });
 
-      
-      function addSceneryElements() {
-    // Función auxiliar para posicionar elementos aleatoriamente
-    function randomPosition() {
-        return new THREE.Vector3(
-            (Math.random() - 0.5) * 38,
-            0,
-            (Math.random() - 0.5) * 38
-        );
-    }
 
-    // Árboles
-    const treeGeometry = new THREE.ConeGeometry(1, 4, 8);
-    const treeMaterial = new THREE.MeshPhongMaterial({ color: 0x228B22 });
-    const trunkGeometry = new THREE.CylinderGeometry(0.2, 0.2, 1, 8);
-    const trunkMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
+        function addSceneryElements() {
+            // Función auxiliar para posicionar elementos aleatoriamente
+            function randomPosition() {
+                return new THREE.Vector3(
+                    (Math.random() - 0.5) * 38,
+                    0,
+                    (Math.random() - 0.5) * 38
+                );
+            }
 
-    for (let i = 0; i < 25; i++) {
-        const tree = new THREE.Group();
-        
-        const leaves = new THREE.Mesh(treeGeometry, treeMaterial);
-        leaves.position.y = 3;
-        leaves.castShadow = true;
-        tree.add(leaves);
+            // Árboles
+            const treeGeometry = new THREE.ConeGeometry(1, 4, 8);
+            const treeMaterial = new THREE.MeshPhongMaterial({ color: 0x228B22 });
+            const trunkGeometry = new THREE.CylinderGeometry(0.2, 0.2, 1, 8);
+            const trunkMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
 
-        const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
-        trunk.position.y = 0.5;
-        trunk.castShadow = true;
-        tree.add(trunk);
+            for (let i = 0; i < 25; i++) {
+                const tree = new THREE.Group();
 
-        tree.position.copy(randomPosition());
-        tree.scale.setScalar(0.5 + Math.random() * 1);
-        scene.add(tree);
-    }
+                const leaves = new THREE.Mesh(treeGeometry, treeMaterial);
+                leaves.position.y = 3;
+                leaves.castShadow = true;
+                tree.add(leaves);
 
-    // Rocas
-    const rockGeometry = new THREE.DodecahedronGeometry(1);
-    const rockMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 });
+                const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+                trunk.position.y = 0.5;
+                trunk.castShadow = true;
+                tree.add(trunk);
 
-    for (let i = 0; i < 150; i++) {
-        const rock = new THREE.Mesh(rockGeometry, rockMaterial);
-        rock.position.copy(randomPosition());
-        const scale = 0.01 + Math.random() * 1.3; // Varía el tamaño de las rocas
-        rock.scale.set(scale, scale * 0.8, scale);
-        rock.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
-        rock.castShadow = true;
-        scene.add(rock);
-    }
+                tree.position.copy(randomPosition());
+                tree.scale.setScalar(0.5 + Math.random() * 1);
+                scene.add(tree);
+            }
 
-    // Pasto (alto y bajo)
-    const lowGrassGeometry = new THREE.PlaneGeometry(0.05, 0.8);
-    const highGrassGeometry = new THREE.PlaneGeometry(0.05, 1.6);
-    const grassMaterial = new THREE.MeshPhongMaterial({ 
-        color: 0x33FF33, 
-        side: THREE.DoubleSide,
-        transparent: true,
-        alphaTest: 0.5
-    });
+            // Rocas
+            const rockGeometry = new THREE.DodecahedronGeometry(1);
+            const rockMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 });
 
-    for (let i = 0; i < 1000; i++) {
-        const grassGeometry = Math.random() > 0.5 ? lowGrassGeometry : highGrassGeometry;
-        const grass = new THREE.Mesh(grassGeometry, grassMaterial);
-        grass.position.copy(randomPosition());
-        grass.rotation.y = Math.random() * Math.PI;
-        grass.castShadow = true;
-        scene.add(grass);
+            for (let i = 0; i < 150; i++) {
+                const rock = new THREE.Mesh(rockGeometry, rockMaterial);
+                rock.position.copy(randomPosition());
+                const scale = 0.01 + Math.random() * 1.3; // Varía el tamaño de las rocas
+                rock.scale.set(scale, scale * 0.8, scale);
+                rock.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+                rock.castShadow = true;
+                scene.add(rock);
+            }
 
-        // Crear una segunda hoja de pasto cruzada
-        const crossGrass = new THREE.Mesh(grassGeometry, grassMaterial);
-        crossGrass.position.copy(grass.position);
-        crossGrass.rotation.y = grass.rotation.y + Math.PI / 2;
-        crossGrass.castShadow = true;
-        scene.add(crossGrass);
+            // Pasto (alto y bajo)
+            const lowGrassGeometry = new THREE.PlaneGeometry(0.05, 0.8);
+            const highGrassGeometry = new THREE.PlaneGeometry(0.05, 1.6);
+            const grassMaterial = new THREE.MeshPhongMaterial({
+                color: 0x33FF33,
+                side: THREE.DoubleSide,
+                transparent: true,
+                alphaTest: 0.5
+            });
 
-    }
-}
+            for (let i = 0; i < 1000; i++) {
+                const grassGeometry = Math.random() > 0.5 ? lowGrassGeometry : highGrassGeometry;
+                const grass = new THREE.Mesh(grassGeometry, grassMaterial);
+                grass.position.copy(randomPosition());
+                grass.rotation.y = Math.random() * Math.PI;
+                grass.castShadow = true;
+                scene.add(grass);
 
-// Llamar a la función para añadir los elementos al escenario
-addSceneryElements();
-        
+                // Crear una segunda hoja de pasto cruzada
+                const crossGrass = new THREE.Mesh(grassGeometry, grassMaterial);
+                crossGrass.position.copy(grass.position);
+                crossGrass.rotation.y = grass.rotation.y + Math.PI / 2;
+                crossGrass.castShadow = true;
+                scene.add(crossGrass);
+
+            }
+        }
+
+        function createImprovedWaterCourse() {
+            // Crear una forma irregular para el agua
+            const shape = new THREE.Shape();
+            shape.moveTo(0, 0);
+            shape.bezierCurveTo(10, 5, 20, -5, 40, 0);
+            shape.lineTo(40, 4);
+            shape.bezierCurveTo(20, -1, 10, 9, 0, 4);
+            shape.lineTo(0, 0);
+
+            // Crear geometría a partir de la forma
+            const geometry = new THREE.ExtrudeGeometry(shape, {
+                steps: 100,
+                bevelEnabled: false,
+                depth: 0.2
+            });
+
+            // Material para el agua con efecto de movimiento y ligera transparencia
+            const waterMaterial = new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0 },
+                    color: { value: new THREE.Color(0x00f7ff) }
+                },
+                vertexShader: `
+      uniform float time;
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        vec3 pos = position;
+        float waveHeight = sin(pos.x * 0.5 + time) * 0.1;
+        waveHeight += sin(pos.y * 0.5 + time) * 0.1;
+        pos.z += waveHeight;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+      }
+    `,
+                fragmentShader: `
+      uniform vec3 color;
+      uniform float time;
+      varying vec2 vUv;
+      void main() {
+        float alpha = 0.8 + 0.2 * sin(vUv.x * 10.0 + vUv.y * 10.0 - time);
+        gl_FragColor = vec4(color, alpha);
+      }
+    `,
+                transparent: true,
+                opacity: 0.9
+            });
+
+            // Crear el mesh del agua
+            const water = new THREE.Mesh(geometry, waterMaterial);
+
+            // Rotar y posicionar el agua
+            water.rotation.x = -Math.PI / 2;
+            water.position.y = 0.1;
+
+            // Función de animación
+            function animate() {
+                requestAnimationFrame(animate);
+                water.material.uniforms.time.value += 0.01;
+            }
+            animate();
+
+            return water;
+        }
+
+        // Uso:
+        const waterCourse = createImprovedWaterCourse();
+        scene.add(waterCourse);
+
+
+
+        // Llamar a la función para añadir los elementos al escenario
+        addSceneryElements();
+
         // Función de animación
         function animate() {
             requestAnimationFrame(animate);
@@ -475,4 +543,5 @@ addSceneryElements();
         });
     </script>
 </body>
+
 </html>
