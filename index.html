@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -101,7 +101,7 @@
         // Generar elevaciones aleatorias para el terreno
         const vertices = terrain.geometry.attributes.position.array;
         for (let i = 0; i <= vertices.length; i += 3) {
-            vertices[i + 2] = Math.random() * 0.5;
+            vertices[i + 2] = Math.random() * 0.7;
         }
         terrain.geometry.attributes.position.needsUpdate = false;
         terrain.geometry.computeVertexNormals();
@@ -451,70 +451,81 @@
 
             }
         }
-
-        function createImprovedWaterCourse() {
+      
             // Crear una forma irregular para el agua
-            const shape = new THREE.Shape();
-            shape.moveTo(0, 0);
-            shape.bezierCurveTo(10, 5, 20, -5, 40, 0);
-            shape.lineTo(40, 4);
-            shape.bezierCurveTo(20, -1, 10, 9, 0, 4);
-            shape.lineTo(0, 0);
+        function createImprovedWaterCourse(mapSize) {
+    const shape = new THREE.Shape();
+    const scaleFactor = mapSize / 40; // Ajustamos el factor de escala basado en el tamaño del mapa
 
-            // Crear geometría a partir de la forma
-            const geometry = new THREE.ExtrudeGeometry(shape, {
-                steps: 100,
-                bevelEnabled: false,
-                depth: 0.2
-            });
+    shape.moveTo(0, 0);
+    shape.bezierCurveTo(10 * scaleFactor, 5 * scaleFactor, 20 * scaleFactor, -5 * scaleFactor, 40 * scaleFactor, 0);
+    shape.lineTo(40 * scaleFactor, 4 * scaleFactor);
+    shape.bezierCurveTo(20 * scaleFactor, -1 * scaleFactor, 10 * scaleFactor, 9 * scaleFactor, 0, 4 * scaleFactor);
+    shape.lineTo(0, 0);
 
-            // Material para el agua con efecto de movimiento y ligera transparencia
-            const waterMaterial = new THREE.ShaderMaterial({
-                uniforms: {
-                    time: { value: 0 },
-                    color: { value: new THREE.Color(0x00f7ff) }
-                },
-                vertexShader: `
+    // Crear geometría a partir de la forma
+    const geometry = new THREE.ExtrudeGeometry(shape, {
+        steps: 200,
+        bevelEnabled: false,
+        depth: 0.22 * scaleFactor
+    });
+
+    // Material para el agua con efecto de movimiento y ligera transparencia
+    const waterMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+            time: { value: 0 },
+            color: { value: new THREE.Color(0x00f7ff) }
+        },
+        vertexShader: `
       uniform float time;
       varying vec2 vUv;
       void main() {
         vUv = uv;
         vec3 pos = position;
-        float waveHeight = sin(pos.x * 0.5 + time) * 0.1;
-        waveHeight += sin(pos.y * 0.5 + time) * 0.1;
+        float waveHeight = sin(pos.x * 0.02 + time) * 0.02;
+        waveHeight += sin(pos.y * 0.02 + time) * 0.01;
         pos.z += waveHeight;
         gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
       }
     `,
-                fragmentShader: `
+        fragmentShader: `
       uniform vec3 color;
       uniform float time;
       varying vec2 vUv;
       void main() {
-        float alpha = 0.8 + 0.2 * sin(vUv.x * 10.0 + vUv.y * 10.0 - time);
+        float alpha = 0.3 + 0.0 * sin(vUv.x * 10.0 + vUv.y * 10.0 - time);
         gl_FragColor = vec4(color, alpha);
       }
     `,
-                transparent: true,
-                opacity: 0.9
-            });
+        transparent: true,
+        opacity: 1
+    });
 
-            // Crear el mesh del agua
-            const water = new THREE.Mesh(geometry, waterMaterial);
+    // Crear el mesh del agua
+    const water = new THREE.Mesh(geometry, waterMaterial);
 
-            // Rotar y posicionar el agua
-            water.rotation.x = -Math.PI / 2;
-            water.position.y = 0.1;
+    // Rotar y posicionar el agua
+    water.rotation.x = -Math.PI / 2;
+    water.position.y = -0.1;
 
-            // Función de animación
-            function animate() {
-                requestAnimationFrame(animate);
-                water.material.uniforms.time.value += 0.01;
-            }
-            animate();
+    // Centrar el agua en el mapa
+    water.position.x = -20;
+    water.position.z = 0;
 
-            return water;
-        }
+    // Función de animación
+    function animate() {
+        requestAnimationFrame(animate);
+        water.material.uniforms.time.value += 0.02;
+    }
+    animate();
+
+    return water;
+}
+
+// Uso:
+const mapSize = 83; // Ajusta esto al tamaño real de tu mapa
+const water = createImprovedWaterCourse(mapSize);
+scene.add(water);
 
         // Uso:
         const waterCourse = createImprovedWaterCourse();
